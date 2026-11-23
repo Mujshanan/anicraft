@@ -1,14 +1,13 @@
 //! Native Smart Controller UI foundation.
 //!
-//! This first UI milestone provides a Stage tool and transient handle selection only. It does
-//! not create document bindings, evaluate controllers, mutate targets, or persist data. Those
-//! operations stay hidden until their host/core contracts and tests are implemented.
+//! This first UI milestone provides Stage handles as transient editor state only. It does not
+//! create document bindings, evaluate controllers, mutate targets, or persist data.
 
-use crate::app::{App, Tool};
+use crate::app::{App, Drag, Tool};
 use anicraft_engine::geom::Vec2;
 use egui::{Color32, Painter, Pos2, Stroke, Ui};
 
-/// Create a transient handle, or select the nearest existing handle.
+/// Create a transient handle, or select the nearest existing handle on click.
 pub fn click(app: &mut App, at: Pos2, zoom: f32) {
     let tolerance = 10.0 / zoom.max(0.001);
     if let Some(index) = nearest_handle(&app.smart_controller_points, at, tolerance) {
@@ -16,6 +15,25 @@ pub fn click(app: &mut App, at: Pos2, zoom: f32) {
     } else {
         app.smart_controller_points.push(Vec2::new(at.x, at.y));
         app.smart_controller_selected = Some(app.smart_controller_points.len() - 1);
+    }
+}
+
+/// Begin a drag only when an existing handle is hit. Empty-stage clicks remain the create gesture.
+pub fn drag_start(app: &mut App, at: Pos2, zoom: f32) -> Drag {
+    let tolerance = 10.0 / zoom.max(0.001);
+    match nearest_handle(&app.smart_controller_points, at, tolerance) {
+        Some(index) => {
+            app.smart_controller_selected = Some(index);
+            Drag::SmartControllerHandle { index }
+        }
+        None => Drag::None,
+    }
+}
+
+/// Move a transient handle to the current stage-space pointer position.
+pub fn drag_to(app: &mut App, index: usize, at: Pos2) {
+    if move_handle(&mut app.smart_controller_points, index, at) {
+        app.smart_controller_selected = Some(index);
     }
 }
 
@@ -29,6 +47,14 @@ pub fn nearest_handle(points: &[Vec2], at: Pos2, tolerance: f32) -> Option<usize
         let distance = (point.x - at.x).hypot(point.y - at.y);
         (distance <= tolerance).then_some((index, distance))
     }).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(index, _)| index)
+}
+
+/// Update one transient handle. Invalid coordinates or indices leave the state unchanged.
+pub fn move_handle(points: &mut [Vec2], index: usize, at: Pos2) -> bool {
+    if !at.x.is_finite() || !at.y.is_finite() { return false; }
+    let Some(point) = points.get_mut(index) else { return false; };
+    *point = Vec2::new(at.x, at.y);
+    true
 }
 
 /// Draw transient controller handles above the rendered artwork.
@@ -46,7 +72,7 @@ pub fn draw(app: &App, painter: &Painter, to_screen: impl Fn(Vec2) -> Pos2) {
 
 /// Native Properties UI for the current transient handle draft.
 pub fn show(app: &mut App, ui: &mut Ui) {
-    ui.label(tr!("Create and select controller handles on the Stage."));
+    ui.label(tr!("Create and select controller handles on the Stage. Drag a handle to reposition it."));
     ui.separator();
     match app.smart_controller_selected.and_then(|i| app.smart_controller_points.get(i).copied().map(|p| (i, p))) {
         Some((index, point)) => {
@@ -87,5 +113,20 @@ mod tests {
         let points = [Vec2::new(f32::NAN, 0.0), Vec2::new(1.0, 1.0)];
         assert_eq!(nearest_handle(&points, Pos2::new(1.0, 1.0), f32::NAN), None);
         assert_eq!(nearest_handle(&points, Pos2::new(1.0, 1.0), 1.0), Some(1));
+    }
+
+    #[test]
+    fn dragging_moves_only_the_selected_transient_handle() {
+        let mut points = [Vec2::new(1.0, 2.0), Vec2::new(10.0, 20.0)];
+        assert!(move_handle(&mut points, 1, Pos2::new(15.0, 25.0)));
+        assert_eq!(points, [Vec2::new(1.0, 2.0), Vec2::new(15.0, 25.0)]);
+    }
+
+    #[test]
+    fn invalid_drag_coordinates_or_handle_indices_do_not_mutate_state() {
+        let mut points = [Vec2::new(1.0, 2.0)];
+        assert!(!move_handle(&mut points, 0, Pos2::new(f32::NAN, 4.0)));
+        assert!(!move_handle(&mut points, 9, Pos2::new(3.0, 4.0)));
+        assert_eq!(points, [Vec2::new(1.0, 2.0)]);
     }
 }

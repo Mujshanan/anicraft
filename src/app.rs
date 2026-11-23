@@ -283,6 +283,8 @@ pub enum Drag {
     ArmatureMove { layer: anicraft_engine::doc::LayerId, last: egui::Pos2 },
     /// Asset Warp (ADR 0079): pin `pin` of `element` follows the pointer.
     WarpPin { element: anicraft_engine::doc::ElementId, pin: anicraft_engine::doc::warp::PinId },
+    /// Smart Controller: move a transient Stage handle; this is editor view state, not an undoable document edit.
+    SmartControllerHandle { index: usize },
     /// Moving one of the open symbol's 9-slice guides (ADR 0055).
     SliceGuide { guide: crate::scale_grid::Guide },
     /// Selection tool: moving the scene's guide `index` (ADR 0076); `off`: the pointer is over a
