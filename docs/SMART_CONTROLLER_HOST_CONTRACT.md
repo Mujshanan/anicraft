@@ -42,9 +42,11 @@ The relevant semantics are implemented in AniCraft's `bone.info` command:
 - `bones[].swing` is `sprung_pose.angle - constrained_keyed_pose.angle`, in degrees.
 - `name` is display text, not identity.
 
-The adapter must reject a response whose frame differs from the requested frame, match the bone by numeric ID in the explicitly mapped layer response, and convert the selected angle to radians. Spring swing is included only under an explicit caller-selected policy. AniCraft does not choose wrapped/unwrapped semantics for Smart Controller; the caller supplies that metadata.
+The adapter must reject a response whose frame differs from the requested frame, verify that the returned armature layer equals the explicit layer mapping, match the bone by numeric ID in that layer response, and convert the selected angle to radians. Spring swing is included only under an explicit caller-selected policy. AniCraft does not choose wrapped/unwrapped semantics for Smart Controller; the caller supplies that metadata.
 
 ### Snapshot guarantees and limitations
+
+The canonical snapshot provider passes an explicit frame and validates both the echoed frame and armature layer. The older V1 Slider command remains a separate current-playhead, on-demand preview path; it is not a frame-pinned canonical snapshot.
 
 A successful read is a point-in-time value for one invocation, not a live subscription or playback callback. AniCraft does not promise that a response remains fresh after the command returns. The adapter owns the immutable snapshot and must not cache it across invocations. A failed or mismatched query is unavailable; missing/malformed bone data is invalid. No default angle is supplied.
 
