@@ -1,6 +1,6 @@
 # Forma Deform — Native UI Foundation
 
-**Status:** M1 foundation implemented on the AniCraft host branch. This is not a completed Smart Controller workflow.
+**Status:** M1 foundation and the read-only M2 selection inspector are implemented on the AniCraft host branch. Binding and evaluation are not implemented.
 
 ## Product boundary
 
@@ -28,8 +28,9 @@ No Save, Apply, Bake, or Preview action is shown because there is no verified ho
 ## M1 limitations
 
 - Handles can be created, selected, dragged, removed, and cleared; all edits remain transient view state.
-- No source-bone picker or stable source binding exists.
-- No target identity or target capability inspector exists.
+- M2 reads AniCraft's current selected bone and artwork identities in Properties; selection is made with the existing Bone and Select tools.
+- The M2 inspector is read-only. It does not establish controller compatibility, create a source/target binding, or capture a neutral value.
+- No target capability contract or controller-input snapshot API exists.
 - No mapping editor, validation graph, or evaluation breakdown exists.
 - No document persistence or migration exists.
 - No controller evaluation, target application, or live playback exists.
@@ -37,7 +38,7 @@ No Save, Apply, Bake, or Preview action is shown because there is no verified ho
 
 ## Next UI milestones
 
-1. **M2 — Target-aware authoring:** verified target selection/identity, source selection, explicit neutral capture, and capability-aware inspector states.
+1. **M2 — Target-aware authoring:** selection identity inspection is implemented; verified capability queries and explicit neutral capture remain blocked on a host/core contract.
 2. **M3 — Mapping editor:** supported one-dimensional range/easing controls, validation, and a mapping graph backed by the canonical Forma Deform core.
 3. **M4 — Deterministic preview:** on-demand non-mutating evaluation with raw input, normalized input, mapped output, diagnostics, and a read-only Stage overlay.
 4. **M5 — Host persistence and commands:** versioned document-owned bindings, explicit commands, migration, and one-step AniCraft undo/redo.
@@ -52,6 +53,8 @@ No Save, Apply, Bake, or Preview action is shown because there is no verified ho
 - [x] Unsupported binding, preview, apply, persistence, and playback actions are not exposed.
 - [x] Hit testing rejects invalid tolerance and non-finite input.
 - [x] Dragging updates only the selected transient handle and rejects invalid coordinates/indices.
+- [x] M2 Properties inspector reports the selected bone ID/name/layer and selected artwork ID/name/type/layer using existing host selections.
+- [x] M2 clearly labels the inspector as read-only and states that compatibility, neutral capture, binding, and saving are unavailable.
 - [ ] AniCraft native Windows build and host CI pass on the exact PR head.
 - [ ] Manual Windows smoke test confirms tool switching, click-to-create, drag-to-move, live Properties coordinates, and no document dirty-state changes.
 
