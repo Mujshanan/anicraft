@@ -1,0 +1,2 @@
+evidence_id,repository,source_commit,source_tree,scope,change_classification,ci_reason
+FDM-06.13-HOST-BASELINE,Mujshanan/anicraft,2df7775907d1458ce653e7e6314ec8a5d7d565f5,80071fb3f714944e49608668871d4cf53a6159a5,workspace tests clippy cargo-deny and macOS Windows compile,test-only audit metadata; no Rust source or build configuration changed,source-neutral audit artifact added to trigger path-filtered host CI
