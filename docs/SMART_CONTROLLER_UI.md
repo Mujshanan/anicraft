@@ -12,11 +12,12 @@ The current slice provides:
 
 - A native Smart Controller entry in AniCraft's existing tool strip.
 - Stage-space creation and selection of temporary controller handles.
+- Drag-to-move editing for an existing transient handle, with live coordinates in Properties.
 - A Stage overlay rendered above artwork and outside the document render pipeline.
 - A Properties section showing the selected handle's stage coordinates.
 - Explicit removal and clearing of temporary handles.
 - Keyboard/screen-reader naming through the existing tool registry and accessible button system.
-- Unit coverage for nearest-handle hit testing and invalid/non-finite inputs.
+- Unit coverage for nearest-handle hit testing, valid handle movement, and invalid/non-finite inputs.
 
 ### State and safety
 
@@ -26,7 +27,7 @@ No Save, Apply, Bake, or Preview action is shown because there is no verified ho
 
 ## M1 limitations
 
-- Handles can be created, selected, removed, and cleared; drag editing is not yet implemented.
+- Handles can be created, selected, dragged, removed, and cleared; all edits remain transient view state.
 - No source-bone picker or stable source binding exists.
 - No target identity or target capability inspector exists.
 - No mapping editor, validation graph, or evaluation breakdown exists.
@@ -50,7 +51,8 @@ No Save, Apply, Bake, or Preview action is shown because there is no verified ho
 - [x] Properties exposes the selected handle and explicit draft cleanup.
 - [x] Unsupported binding, preview, apply, persistence, and playback actions are not exposed.
 - [x] Hit testing rejects invalid tolerance and non-finite input.
+- [x] Dragging updates only the selected transient handle and rejects invalid coordinates/indices.
 - [ ] AniCraft native Windows build and host CI pass on the exact PR head.
-- [ ] Manual Windows smoke test confirms tool switching, stage hit testing, Properties behavior, and no document dirty-state changes.
+- [ ] Manual Windows smoke test confirms tool switching, click-to-create, drag-to-move, live Properties coordinates, and no document dirty-state changes.
 
 M1 must not be described as a complete deformation/controller authoring UI until the later milestones and their host acceptance tests pass.
