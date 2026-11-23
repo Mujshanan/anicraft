@@ -59,3 +59,16 @@ No Save, Apply, Bake, or Preview action is shown because there is no verified ho
 - [ ] Manual Windows smoke test confirms tool switching, click-to-create, drag-to-move, live Properties coordinates, and no document dirty-state changes.
 
 M1 must not be described as a complete deformation/controller authoring UI until the later milestones and their host acceptance tests pass.
+
+
+---
+
+## M2 host/core contract baseline
+
+The read-only host contract is recorded in [SMART_CONTROLLER_HOST_CONTRACT.md](SMART_CONTROLLER_HOST_CONTRACT.md), and the core/adapter contract is recorded in [Forma Deform's contract](https://github.com/Mujshanan/forma-deform/blob/main/docs/contracts/SMART_CONTROLLER_HOST_CONTRACTS.md).
+
+- `bone.info` snapshots must specify an explicit zero-based frame; `angle` is constrained keyed pose in degrees and `swing` is the separately reported spring contribution.
+- `warp.info` identifies pins using `pins[].pin`, not `pins[].id`; a supported geometry target requires an exact element/pin match on live non-bitmap artwork.
+- `ElementId`, `BoneId`, and `PinId` are document-scoped. AniCraft currently exposes no stable document UUID, so they are not sufficient as globally unique persistent binding keys.
+- `warp.pin_move` remains mutating and must not be called outside a verified host preview/undo transaction.
+- No neutral capture, binding creation, or persistence controls are introduced by these contracts. CCC-01.5 remains unchanged.
