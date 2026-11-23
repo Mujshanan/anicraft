@@ -22,6 +22,7 @@ pub fn tool_topic(t: Tool) -> &'static str {
         Tool::Width => "drawing.md#variable-width-lines",
         Tool::Bone => "masks-guides-camera-bones.md#building-an-armature",
         Tool::Bind => "masks-guides-camera-bones.md#bones-inside-a-shape",
+        Tool::SmartController => "masks-guides-camera-bones.md#building-an-armature",
         Tool::Pen => "drawing.md#the-pen",
         Tool::Text => "text.md#typing-text",
         Tool::Pencil | Tool::Rect | Tool::Oval | Tool::Star | Tool::Line => "drawing.md#drawing-shapes-and-lines",
