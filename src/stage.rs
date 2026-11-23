@@ -544,6 +544,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 Tool::Bone => crate::bone_tool::drag_start(app, xf, press),
                 Tool::Bind => crate::bind_tool::drag_start(app, xf, press),
                 Tool::Warp => crate::warp_tool::drag_start(app, xf, press),
+                Tool::SmartController => crate::smart_controller_tool::drag_start(app, sp, zoom),
                 Tool::Width => crate::widthtool::drag_start(app, press, xf),
                 Tool::GradientTransform => crate::gradient_tool::drag_start(app, press, xf),
                 Tool::Pencil => {
@@ -726,6 +727,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 let (element, pin) = (*element, *pin);
                 crate::warp_tool::drag_to(app, element, pin, c);
             }
+            (Drag::SmartControllerHandle { index }, Some(c)) => {
+                crate::smart_controller_tool::drag_to(app, *index, c);
+            }
             (d @ Drag::Width { .. }, Some(c)) => {
                 let d = *d;
                 crate::widthtool::drag_to(app, d, to_v(c), alt, zoom);
@@ -755,6 +759,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
             }
             Drag::Bend { .. } | Drag::RawPoint { .. } | Drag::RawHandle { .. } => end_raw_drag(app),
             Drag::Transform { .. } | Drag::SliceGuide { .. } | Drag::Points { .. } | Drag::Hint { .. } | Drag::MotionMove { .. } | Drag::CameraPan { .. } | Drag::CameraRotate { .. } | Drag::BonePose { .. } | Drag::ArmatureMove { .. } | Drag::WarpPin { .. } => app.s.end_gesture(),
+            Drag::SmartControllerHandle { .. } => {},
             Drag::Bone { from, parent, head, cur } => crate::bone_tool::drag_end(app, xf, from, parent, head, cur),
             Drag::Guide { index, .. } => crate::rulers::drag_end(app, index, geo, ui.input(|i| i.pointer.latest_pos())),
             Drag::Width { .. } => crate::widthtool::drag_end(app),
