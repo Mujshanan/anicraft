@@ -37,6 +37,7 @@ mod font_fallback;
 mod publish_panel;
 mod erasertool;
 mod bind_tool;
+mod smart_controller_tool;
 mod warp_tool;
 mod bone_tool;
 mod camera_tool;
