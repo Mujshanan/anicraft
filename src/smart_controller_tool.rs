@@ -70,6 +70,66 @@ pub fn draw(app: &App, painter: &Painter, to_screen: impl Fn(Vec2) -> Pos2) {
     }
 }
 
+/// Read-only M2 context: reuse AniCraft's current bone and artwork selections.
+fn show_target_aware_context(app: &App, ui: &mut Ui) {
+    ui.heading(tr!("Authoring context"));
+    ui.label(tr!("Choose a source with the Bone tool and artwork with the Select tool, then return here."));
+    ui.separator();
+
+    ui.label(egui::RichText::new(tr!("Source bone")).strong());
+    match app.bone_sel.and_then(|id| {
+        app.s.timeline().layers.iter().find_map(|layer| {
+            layer.armature.as_ref().and_then(|armature| {
+                armature.bone(id).map(|bone| (id, layer.name.as_str(), bone.name.as_str(), bone.shape))
+            })
+        })
+    }) {
+        Some((id, layer, name, shape)) => {
+            let display_name = if name.is_empty() { format!("Bone #{}", id.0) } else { name.to_owned() };
+            ui.label(tr!("{display_name} · ID {id}", display_name = display_name, id = id.0));
+            ui.label(tr!("Armature layer: {layer}", layer = layer));
+            if let Some(shape) = shape {
+                ui.label(tr!("Deforms shape ID {id}", id = shape.0));
+            }
+        }
+        None => {
+            ui.label(tr!("No source bone selected. Select a bone with the Bone tool."));
+        }
+    }
+
+    ui.separator();
+    ui.label(egui::RichText::new(tr!("Selected artwork")).strong());
+    let selected = app.s.selected_elements();
+    if selected.is_empty() {
+        ui.label(tr!("No artwork selected. Select artwork with the Select tool."));
+    } else {
+        for (layer_id, element) in selected.iter() {
+            let kind = match &element.kind {
+                anicraft_engine::doc::ElementKind::Shape(_) => tr!("Shape"),
+                anicraft_engine::doc::ElementKind::Symbol { .. } => tr!("Symbol instance"),
+                anicraft_engine::doc::ElementKind::Text(_) => tr!("Text"),
+                anicraft_engine::doc::ElementKind::Camera => tr!("Camera"),
+                _ => tr!("Other artwork"),
+            };
+            let display_name = if element.name.is_empty() {
+                format!("Artwork #{}", element.id.0)
+            } else {
+                element.name.clone()
+            };
+            let layer_name = app.s.timeline().layer(*layer_id).map_or_else(
+                || tr!("Missing layer").to_string(),
+                |layer| layer.name.clone(),
+            );
+            ui.label(tr!("{display_name} · {kind}", display_name = display_name, kind = kind));
+            ui.label(tr!("Layer: {layer_name} · Element ID {id}", layer_name = layer_name, id = element.id.0));
+        }
+    }
+
+    ui.separator();
+    ui.label(egui::RichText::new(tr!("Inspection only — compatibility not verified")).color(Color32::from_rgb(220, 170, 90)).strong());
+    ui.label(tr!("AniCraft exposes these selections, but no Forma Deform target-capability or controller-input snapshot contract is connected. Binding, neutral capture, and saving remain unavailable."));
+}
+
 /// Native Properties UI for the current transient handle draft.
 pub fn show(app: &mut App, ui: &mut Ui) {
     ui.label(tr!("Create and select controller handles on the Stage. Drag a handle to reposition it."));
@@ -92,6 +152,8 @@ pub fn show(app: &mut App, ui: &mut Ui) {
         app.smart_controller_points.clear();
         app.smart_controller_selected = None;
     }
+    ui.separator();
+    show_target_aware_context(app, ui);
     ui.separator();
     ui.label(egui::RichText::new(tr!("Draft UI only — not saved")).color(Color32::from_rgb(220, 170, 90)).strong());
     ui.label(tr!("Bone binding, mapping evaluation, target application, persistent storage and live playback are not connected yet. These handles are temporary editor guides and do not change artwork."));
