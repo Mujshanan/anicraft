@@ -438,7 +438,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                     None => CursorIcon::Default,
                 }
             }
-            Tool::Rect | Tool::Oval | Tool::Star | Tool::Line | Tool::Pen | Tool::Pencil | Tool::Brush | Tool::PaintBrush | Tool::Eraser | Tool::PaintBucket | Tool::InkBottle | Tool::Eyedropper | Tool::Bone | Tool::Bind | Tool::Warp => CursorIcon::Crosshair,
+            Tool::Rect | Tool::Oval | Tool::Star | Tool::Line | Tool::Pen | Tool::Pencil | Tool::Brush | Tool::PaintBrush | Tool::Eraser | Tool::PaintBucket | Tool::InkBottle | Tool::Eyedropper | Tool::Bone | Tool::Bind | Tool::SmartController | Tool::Warp => CursorIcon::Crosshair,
             Tool::Text => CursorIcon::Text,
             Tool::Zoom => {
                 if alt {
@@ -844,6 +844,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 Tool::Bone if !panning => crate::bone_tool::click(app, xf, p),
                 Tool::Bind if !panning => crate::bind_tool::click(app, xf, p, shift, command),
                 Tool::Warp if !panning => crate::warp_tool::click(app, xf, p),
+                Tool::SmartController if !panning => crate::smart_controller_tool::click(app, sp, zoom),
                 Tool::Select | Tool::Transform if !panning && multi => crate::onion::click(app, sp, shift, zoom),
                 // A click on a bone picks it (ADR 0043).
                 Tool::Select if !panning && let Some((layer, bone, _)) = crate::bone_tool::hit(app, xf, p) => crate::bone_tool::select(app, layer, Some(bone)),
@@ -1180,6 +1181,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     crate::bone_tool::draw(app, &painter, xf);
     crate::bind_tool::draw(app, &painter, xf);
     crate::warp_tool::draw(app, &painter, xf);
+    // Smart Controller handles are transient editor overlays, never artwork or document data.
+    let controller_painter = painter.with_layer_id(egui::LayerId::new(egui::Order::Foreground, ui.id().with("smart-controller-handles")));
+    crate::smart_controller_tool::draw(app, &controller_painter, to_screen);
     let sel_stroke = Stroke::new(1.0, T.selection);
     let raw = raw_ids(app);
     if app.tool == Tool::Select && app.drag == Drag::None

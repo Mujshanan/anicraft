@@ -35,6 +35,7 @@ fn tool_icon(tool: Tool) -> Icon {
         Tool::Bone => Icon::Bone,
         Tool::Bind => Icon::Bind,
         Tool::Warp => Icon::Warp,
+        Tool::SmartController => Icon::Guide,
         Tool::Hand => Icon::Hand,
         Tool::Zoom => Icon::Zoom,
     }
@@ -792,7 +793,7 @@ pub(crate) fn properties(app: &mut App, ui: &mut egui::Ui) {
     // ---- tool options first while a drawing tool is in hand: they're what you reach for ----
     // (While typing, the selected characters' section above takes the Text tool's place.)
     let typing = app.text_edit.is_some();
-    if (!typing || app.tool != Tool::Text) && matches!(app.tool, Tool::Rect | Tool::Oval | Tool::Star | Tool::Line | Tool::Pen | Tool::Text | Tool::Pencil | Tool::Brush | Tool::PaintBrush | Tool::Eraser | Tool::PaintBucket | Tool::InkBottle | Tool::Eyedropper) {
+    if (!typing || app.tool != Tool::Text) && matches!(app.tool, Tool::Rect | Tool::Oval | Tool::Star | Tool::Line | Tool::Pen | Tool::Text | Tool::Pencil | Tool::Brush | Tool::PaintBrush | Tool::Eraser | Tool::PaintBucket | Tool::InkBottle | Tool::Eyedropper | Tool::SmartController) {
         let title = tr!("{tool} tool", tool = crate::i18n::t(app.tool.label()));
         section(ui, "prop_tool", Section::Rule, &title, None, |ui| tool_props(app, ui));
     }
@@ -3090,6 +3091,10 @@ pub(crate) fn stroke_only(tool: Tool) -> bool {
 }
 
 fn tool_props(app: &mut App, ui: &mut egui::Ui) {
+    if app.tool == Tool::SmartController {
+        crate::smart_controller_tool::show(app, ui);
+        return;
+    }
     if app.tool == Tool::Eraser {
         eraser_props(app, ui);
         return;

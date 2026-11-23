@@ -21,6 +21,8 @@ pub enum Tool {
     Width,
     Bone,
     Bind,
+    /// Smart Controller: create and inspect transient controller handles on the Stage.
+    SmartController,
     Pen,
     Text,
     Pencil,
@@ -71,7 +73,7 @@ impl GapSize {
 }
 
 impl Tool {
-    pub const ALL: [Tool; 24] = [Tool::Select, Tool::Subselect, Tool::Transform, Tool::Warp, Tool::GradientTransform, Tool::Width, Tool::Bone, Tool::Bind, Tool::Pen, Tool::Text, Tool::Pencil, Tool::Brush, Tool::PaintBrush, Tool::Eraser, Tool::Rect, Tool::Oval, Tool::Star, Tool::Line, Tool::PaintBucket, Tool::InkBottle, Tool::Eyedropper, Tool::Camera, Tool::Hand, Tool::Zoom];
+    pub const ALL: [Tool; 25] = [Tool::Select, Tool::Subselect, Tool::Transform, Tool::Warp, Tool::GradientTransform, Tool::Width, Tool::Bone, Tool::Bind, Tool::SmartController, Tool::Pen, Tool::Text, Tool::Pencil, Tool::Brush, Tool::PaintBrush, Tool::Eraser, Tool::Rect, Tool::Oval, Tool::Star, Tool::Line, Tool::PaintBucket, Tool::InkBottle, Tool::Eyedropper, Tool::Camera, Tool::Hand, Tool::Zoom];
 
     pub fn label(self) -> &'static str {
         match self {
@@ -83,6 +85,7 @@ impl Tool {
             Tool::Width => tr_noop!("Width"),
             Tool::Bone => tr_noop!("Bone"),
             Tool::Bind => tr_noop!("Bind"),
+            Tool::SmartController => tr_noop!("Smart Controller"),
             Tool::Pen => tr_noop!("Pen"),
             Tool::Text => tr_noop!("Text"),
             Tool::Pencil => tr_noop!("Pencil"),
@@ -112,6 +115,7 @@ impl Tool {
             Tool::Width => Some("U"),
             Tool::Bone => Some("M"),
             Tool::Bind => Some("Shift+M"),
+            Tool::SmartController => None,
             Tool::Pen => Some("P"),
             Tool::Text => Some("T"),
             Tool::Pencil => Some("Shift+Y"),
@@ -143,6 +147,7 @@ impl Tool {
             Tool::Eraser => tr_noop!("Drag to erase lines and fills drawn with Object Drawing off (drawing objects and symbols are kept). [ and ] change the size; the options set the shape and erase mode, and the Faucet deletes a whole fill or line with a click. Double-click the tool to erase everything on the stage."),
             Tool::Width => tr_noop!("Hover a stroke to see its width points. Drag a point's handle to widen or narrow the stroke there (Alt: one side only), drag its dot to slide it along, or drag anywhere on the stroke to add a point. Click a point and press Delete to remove it."),
             Tool::Bone => tr_noop!("Drag from one symbol instance to another to join them with a bone (they move to an armature layer), or drag inside a shape to draw a bone in it (the shape bends with its bones); start on a bone's end to continue the chain. Instances and shapes mix: from a shape's bone end, release over an instance to carry it; from an instance, release over a shape, then draw bones inside it from that bone's end. Click a bone to select it. Pose the armature by dragging bones or instances with the Selection tool."),
+            Tool::SmartController => tr_noop!("Click the Stage to create a controller handle, or click an existing handle to select it. Handles are transient UI drafts; binding, evaluation, persistence and preview are not connected."),
             Tool::Bind => tr_noop!("Shows the points of shapes with bones: a square follows one bone, a triangle several. Click a bone to see the points it moves (filled). Click a point, or drag a box around points, to make them follow only that bone; Shift shares the bone with the ones they follow, Ctrl takes them from it. Turn on Paint Weights in Properties to brush the bone's influence on, off or smooth, shown as a heat map."),
             Tool::Warp => tr_noop!("Click a shape or a bitmap to pin it (the first pin covers it with a warp mesh). Drag a pin to bend the artwork around the other pins; with one pin it moves. Click a pin and press Delete to remove it. A pin moved at another frame keys it, and pins tween."),
             Tool::GradientTransform => tr_noop!("Click a shape with a gradient or bitmap fill to show its handles. Drag the centre to move the fill, the square to change its width, the circle to change its size, the knob to rotate it (Shift: 15° steps) and, on a radial gradient, the triangle to move its focal point. A bitmap fill also has a square for its height and diamonds to skew it. Each drag is one undo step."),
@@ -504,6 +509,10 @@ pub struct App {
     pub zoom_text: Option<String>,
     /// The bone picked on the stage (ADR 0043; view state).
     pub bone_sel: Option<anicraft_engine::doc::BoneId>,
+    /// Smart Controller handles are transient view state; they are not saved in the document.
+    pub smart_controller_points: Vec<anicraft_engine::geom::Vec2>,
+    /// Selected transient Smart Controller handle.
+    pub smart_controller_selected: Option<usize>,
     /// The Bind tool's options: Paint Weights, the brush, the focused point (ADR 0090).
     pub bind: crate::bind_tool::BindOptions,
     /// The warp pin picked with the Warp tool, and the artwork it is on (ADR 0079; view state).
@@ -870,6 +879,8 @@ impl App {
             xf: crate::xform::State::default(),
             zoom_text: None,
             bone_sel: None,
+            smart_controller_points: Vec::new(),
+            smart_controller_selected: None,
             bind: crate::bind_tool::BindOptions::default(),
             warp_pin: None,
             motion_anchors: Vec::new(),
