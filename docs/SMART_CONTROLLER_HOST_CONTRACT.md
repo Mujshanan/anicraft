@@ -42,7 +42,7 @@ The relevant semantics are implemented in AniCraft's `bone.info` command:
 - `bones[].swing` is `sprung_pose.angle - constrained_keyed_pose.angle`, in degrees.
 - `name` is display text, not identity.
 
-The adapter must reject a response whose frame differs from the requested frame, verify that the returned armature layer equals the explicit layer mapping, match the bone by numeric ID in that layer response, and convert the selected angle to radians. Spring swing is included only under an explicit caller-selected policy. AniCraft does not choose wrapped/unwrapped semantics for Smart Controller; the caller supplies that metadata.
+The adapter must reject a response whose frame differs from the requested frame, verify that the layer-scoped response contains exactly one armature and that its layer equals the explicit mapping, then match the bone by numeric ID in that response, and convert the selected angle to radians. Spring swing is included only under an explicit caller-selected policy. AniCraft does not choose wrapped/unwrapped semantics for Smart Controller; the caller supplies that metadata.
 
 ### Snapshot guarantees and limitations
 
